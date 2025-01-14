@@ -22,6 +22,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.dashboard.common.Passwords;
 import org.dashboard.common.Request;
 import org.dashboard.common.models.DashboardModel;
+import org.dashboard.common.models.UserOfDashboard;
 
 public class ServerConnector {
     private String host = "localhost";
@@ -188,7 +189,7 @@ public class ServerConnector {
                 result.exists = Boolean.parseBoolean(response.getMessage().get("exists"));
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'User exists'";
             }
 
             return result;
@@ -226,7 +227,7 @@ public class ServerConnector {
                 result.username = response.getMessage().get("username");
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Create user'";
             }
 
             return result;
@@ -267,7 +268,7 @@ public class ServerConnector {
                 });
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Get user dashboards'";
             }
 
             return result;
@@ -306,7 +307,7 @@ public class ServerConnector {
                 result.dashboardName = response.getMessage().get("dashboardName");
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Create dashboard'";
                 result.username = response.getMessage().get("username");
                 result.dashboardName = response.getMessage().get("dashboardName");
             }
@@ -351,7 +352,7 @@ public class ServerConnector {
                 result.dashboardName = response.getMessage().get("dashboardName");
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Update dashboard'";
                 result.username = response.getMessage().get("username");
                 result.dashboardName = response.getMessage().get("dashboardName");
             }
@@ -396,7 +397,7 @@ public class ServerConnector {
                 result.dashboard.updatePropertiesFromJSON();
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Get dashboard'";
             }
 
             return result;
@@ -468,7 +469,7 @@ public class ServerConnector {
                 result.dashboardName = response.getMessage().get("dashboardName");
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Delete dashboard'";
                 result.username = response.getMessage().get("username");
                 result.dashboardName = response.getMessage().get("dashboardName");
             }
@@ -512,10 +513,313 @@ public class ServerConnector {
                 result.newDashboardName = response.getMessage().get("newDashboardName");
             } else {
                 result.success = false;
-                result.message = response.getMessage().get("error");
+                result.message = response.getMessage().get("error") + " 'Rename dashboard'";
                 result.username = response.getMessage().get("username");
                 result.oldDashboardName = response.getMessage().get("dashboardName");
                 result.newDashboardName = response.getMessage().get("newDashboardName");
+            }
+
+            return result;
+            
+        }
+
+        return null;
+    }
+
+    public class UserOfDashboardResult {
+        public boolean success;
+        public String message;
+        public String username;
+        public String dashboardName;
+        public UserOfDashboard user;
+
+        public UserOfDashboardResult() {
+        }
+    }
+
+    public UserOfDashboardResult getUserOfDashboard(String subjectUser, String username, String token, String dashboardName) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("subjectUser", subjectUser);
+        data.put("username", username);
+        data.put("dashboardName", dashboardName);
+
+        Request request = new Request("Get user of dashboard", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            UserOfDashboardResult result = new UserOfDashboardResult();
+
+            result.username = username;
+            result.dashboardName = dashboardName;
+            
+            if (response.getType().equals("Get user of dashboard success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+                result.user = (UserOfDashboard)response.getObject();
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Get user of dashboard'";
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    public class GetDashboardUsersResult {
+        public boolean success;
+        public String message;
+        public String username;
+        public String dashboardName;
+        public ArrayList<UserOfDashboard> users;
+
+        public GetDashboardUsersResult() {
+        }
+    }
+
+    public GetDashboardUsersResult getDashboardUsers(String username, String token, String dashboardName) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+        data.put("dashboardName", dashboardName);
+
+        Request request = new Request("Get dashboard users", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            GetDashboardUsersResult result = new GetDashboardUsersResult();
+
+            result.username = username;
+            result.dashboardName = dashboardName;
+            
+            if (response.getType().equals("Get dashboard users success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+                result.users = new ArrayList<UserOfDashboard>();
+                if (response.getObject() != null && response.getObject() instanceof ArrayList) {
+                    ArrayList<UserOfDashboard> recievedUsers = (ArrayList<UserOfDashboard>)response.getObject();
+                    recievedUsers.forEach(user -> {
+                        result.users.add(user);
+                    });
+                } else {
+                    result.success = false;
+                    result.message = "Error: No users found";
+                }
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Get dashboard users'";
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    public class UpdateUserOfDashboardResult {
+        public boolean success;
+        public String message;
+        public String username;
+        public String dashboardName;
+        public String subjectUser;
+
+        public UpdateUserOfDashboardResult() {
+        }
+    }
+
+    public UpdateUserOfDashboardResult updateUserOfDashboard(String username, String token, String dashboardName, String subjectUser, String role) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+        data.put("dashboardName", dashboardName);
+        data.put("subjectUser", subjectUser);
+        data.put("newRole", role);
+
+        Request request = new Request("Update user of dashboard", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            UpdateUserOfDashboardResult result = new UpdateUserOfDashboardResult();
+
+            result.username = username;
+            result.dashboardName = dashboardName;
+            result.subjectUser = subjectUser;
+            
+            if (response.getType().equals("Update user of dashboard success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Update user of dashboard'";
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    public class SearchForUserResult {
+        public boolean success;
+        public String message;
+        public ArrayList<String> users;
+
+        public SearchForUserResult() {
+        }
+    }
+
+    public SearchForUserResult searchForUser(String username, String token) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+
+        Request request = new Request("Search for user", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            SearchForUserResult result = new SearchForUserResult();
+            
+            if (response.getType().equals("Search for user success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+                result.users = new ArrayList<String>();
+                if (response.getObject() != null && response.getObject() instanceof ArrayList) {
+                    ArrayList<String> recievedUsers = (ArrayList<String>)response.getObject();
+                    recievedUsers.forEach(user -> {
+                        result.users.add(user);
+                    });
+                }
+            } else if (response.getMessage().get("error").equals("No users found")) {
+                result.success = true;
+                result.message = response.getMessage().get("error");
+                result.users = null;
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Search for user'";
+            }
+
+            return result;
+            
+        }
+
+        return null;
+    }
+
+    public class AddUserOfDashboardResult {
+        public boolean success;
+        public String message;
+        public String username;
+        public String dashboardName;
+        public String subjectUser;
+
+        public AddUserOfDashboardResult() {
+        }
+    }
+
+    public AddUserOfDashboardResult addUserOfDashboard(String username, String token, String dashboardName, String subjectUser, String role) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+        data.put("dashboardName", dashboardName);
+        data.put("subjectUser", subjectUser);
+        data.put("newRole", role);
+
+        Request request = new Request("Add user of dashboard", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            AddUserOfDashboardResult result = new AddUserOfDashboardResult();
+
+            result.username = username;
+            result.dashboardName = dashboardName;
+            result.subjectUser = subjectUser;
+            
+            if (response.getType().equals("Add user of dashboard success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Add user of dashboard'";
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    public class RemoveUserOfDashboardResult {
+        public boolean success;
+        public String message;
+        public String username;
+        public String dashboardName;
+        public String subjectUser;
+
+        public RemoveUserOfDashboardResult() {
+        }
+    }
+
+    public RemoveUserOfDashboardResult removeUserOfDashboard(String username, String token, String dashboardName, String subjectUser, String role) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+        data.put("dashboardName", dashboardName);
+        data.put("subjectUser", subjectUser);
+        data.put("role", role);
+
+        Request request = new Request("Remove user of dashboard", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            RemoveUserOfDashboardResult result = new RemoveUserOfDashboardResult();
+
+            result.username = username;
+            result.dashboardName = dashboardName;
+            result.subjectUser = subjectUser;
+            
+            if (response.getType().equals("Remove user of dashboard success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Remove user of dashboard'";
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    public class DeleteAccountResult {
+        public boolean success;
+        public String message;
+        public String username;
+
+        public DeleteAccountResult() {
+        }
+    }
+
+    public DeleteAccountResult deleteAccount(String username, String token, String password) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+        data.put("password", password);
+
+        Request request = new Request("Delete user", data, token);
+
+        Request response = sendRequest(request);
+
+        if (response != null) {
+            DeleteAccountResult result = new DeleteAccountResult();
+            
+            if (response.getType().equals("User delete success")) {
+                result.success = true;
+                result.message = response.getMessage().get("success");
+            } else {
+                result.success = false;
+                result.message = response.getMessage().get("error") + " 'Delete account'";
             }
 
             return result;

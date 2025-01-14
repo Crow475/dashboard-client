@@ -58,6 +58,10 @@
     -fx-background-color: rgb(10, 88, 202);
 }
 
+#primary.button:disabled {
+    -fx-background-color: rgb(97, 160, 253);
+}
+
 #success.button {
     -fx-background-color: rgb(25, 135, 84);
 }
@@ -123,21 +127,23 @@
     -fx-effect: dropshadow(gaussian, rgba(11, 96, 219, 0.2), 3, 1, 0.0, 0.0);
 }
 
-.color-picker {
+.combo-box-base.color-picker {
     -fx-background-color: rgb(108, 117, 125);
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
+    -fx-border-width: 0px;
+    -fx-min-width: none;
 }
 
-.color-picker:focused {
+.combo-box-base.color-picker:focused {
     -fx-effect: dropshadow(gaussian, rgba(108, 117, 125, 0.2), 3, 1, 0.0, 0.0);
 }
 
-.color-picker:hover {
+.combo-box-base.color-picker:hover {
     -fx-background-color: rgb(92, 99, 106);
 }
 
-.color-picker:pressed {
+.combo-box-base.color-picker:pressed {
     -fx-background-color: rgb(86, 94, 100)
 }
 
@@ -282,6 +288,101 @@
     -fx-background-radius: 0px;
 }
 
+.titled-pane .title {
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-border-color: rgb(211, 212, 213);
+    -fx-border-width: 0 0 1 0;
+}
+
+.titled-pane .title .arrow-button .arrow {
+    -fx-shape: "m 6,8 c -1.21,0.02 -1.16,1.52 -0.36,2.05 1.88,1.88 3.77,3.77 5.65,5.65 0.63,0.65 1.39,0.1 1.84,-0.43 1.86,-1.86 3.72,-3.72 5.57,-5.57 C 19.74,8.69 17.89,7.27 17.11,8.48 15.4,10.18 13.7,11.88 12,13.59 10.24,11.82 8.47,10.06 6.71,8.29 L 6.38,8.08 6,8 Z";
+}
+
+.titled-pane:expanded .title {
+    -fx-background-color: transparent;
+    -fx-border-width: 0 0 0 0;
+}
+
+.titled-pane .content {
+    -fx-background-color: white;
+    -fx-border-color: rgb(211, 212, 213);
+    -fx-border-width: 0 0 1 0;
+}
+
+.titled-pane:focused .title .arrow-button .arrow {
+    -fx-effect: dropshadow(gaussian, rgba(11, 96, 219, 0.2), 3, 1, 0.0, 0.0);
+}
+
+.combo-box-base {
+    -fx-background-radius: 5px;
+    -fx-background-color: white;
+    -fx-border-color: rgb(211, 212, 213);
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+    -fx-min-width: 200px;
+}
+
+.combo-box-base:focused {
+    -fx-border-color: rgb(143, 189, 254);
+    -fx-effect: dropshadow(gaussian, rgba(11, 96, 219, 0.2), 3, 1, 0.0, 0.0);
+}
+
+.combo-box-base .arrow-button .arrow {
+    -fx-shape: "m 6,8 c -1.21,0.02 -1.16,1.52 -0.36,2.05 1.88,1.88 3.77,3.77 5.65,5.65 0.63,0.65 1.39,0.1 1.84,-0.43 1.86,-1.86 3.72,-3.72 5.57,-5.57 C 19.74,8.69 17.89,7.27 17.11,8.48 15.4,10.18 13.7,11.88 12,13.59 10.24,11.82 8.47,10.06 6.71,8.29 L 6.38,8.08 6,8 Z";
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: rgb(211, 212, 213);
+    -fx-border-radius: 3px;
+    -fx-border-width: 1px;
+    -fx-translate-y: 1px;
+}
+
+.combo-box-popup .list-view .list-cell 
+{
+    -fx-padding: 4 0 4 5;
+}
+
+.combo-box-popup .list-view .list-cell:hover 
+{
+    -fx-background-color: rgb(92, 99, 106);
+    -fx-background-radius: 3px;
+}
+
+.combo-box-popup .list-view .list-cell:selected 
+{
+    -fx-background-color: rgb(11, 96, 219);
+    -fx-background-radius: 3px;
+}
+
+.radio-button .radio {
+    -fx-border-width: 1px;
+    -fx-border-color: rgb(211, 212, 213);
+    -fx-border-radius: 20px;
+    -fx-background-color: white;
+    -fx-background-radius: 20px;
+    -fx-background-insets: 0;
+    -fx-alignment: center;
+}
+
+.radio-button:selected .radio {
+    -fx-background-color: rgb(11, 96, 219);
+    -fx-border-color: rgb(11, 96, 219);
+}
+
+.radio-button:focused .radio {
+    -fx-effect: dropshadow(gaussian, rgba(11, 96, 219, 0.2), 3, 1, 0.0, 0.0);
+    -fx-border-color: rgb(143, 189, 254);
+    -fx-border-color: white;
+}
+
+.radio-button .radio .dot {
+    -fx-background-insets: 0;
+    -fx-background-color: white;
+}
+
 #dashboard-menu-top {
     -fx-border-color: rgb(211, 212, 213);
     -fx-border-width: 0 0 1 0;
@@ -305,4 +406,20 @@
 #dashboard-item-secondary {
     -fx-font-size: 12px;
     -fx-text-fill: rgba(108, 117, 125);
+}
+
+#person-item-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+#person-item-secondary {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(108, 117, 125, 0.7);
+}
+
+#warning-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: rgb(220, 53, 69);
 }

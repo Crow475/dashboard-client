@@ -29,7 +29,7 @@ public class UserView {
 
         DashboardView dashboardView = new DashboardView(loginControl, userViewControl, notificationProvider, dialogProvider, serverConnector);
         DashboardListView dashboardListView = new DashboardListView(loginControl, userViewControl, notificationProvider, dialogProvider, serverConnector);
-        SettingsView settingsView = new SettingsView(loginControl, userViewControl, notificationProvider, dialogProvider);
+        SettingsView settingsView = new SettingsView(loginControl, userViewControl, notificationProvider, dialogProvider, serverConnector);
 
         userViewControl.viewModeProperty().addListener((observable, oldValue, newValue) -> {
             switch (newValue) {

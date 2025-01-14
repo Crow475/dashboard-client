@@ -1,7 +1,7 @@
 module org.dashboard.client {
     requires javafx.controls;
     requires javafx.fxml;
-    requires dashboard.common.v02d;
+    requires dashboard.common.v03b;
     requires com.fasterxml.jackson.databind;
     requires io.github.cdimascio.dotenv.java;
     requires java.sql;

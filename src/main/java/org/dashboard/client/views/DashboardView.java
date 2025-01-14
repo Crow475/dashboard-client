@@ -2,30 +2,24 @@ package org.dashboard.client.views;
 
 import java.util.HashMap;
 
-import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
@@ -33,9 +27,10 @@ import javafx.scene.shape.SVGPath;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.dashboard.common.Pair;
+import org.dashboard.common.Role;
 import org.dashboard.common.models.DashboardElementModel;
 import org.dashboard.common.models.DashboardModel;
-
+import org.dashboard.common.models.UserOfDashboard;
 import org.dashboard.client.controls.EditModeControl;
 import org.dashboard.client.controls.LoginControl;
 import org.dashboard.client.controls.UserViewControl;
@@ -48,7 +43,11 @@ import org.dashboard.client.Icons;
 import org.dashboard.client.ObservableDashboardModel;
 import org.dashboard.client.ServerConnector;
 import org.dashboard.client.Icons.Icon;
+import org.dashboard.client.UIElements.DashboardGrid;
 import org.dashboard.client.UIElements.DeleteZone;
+import org.dashboard.client.UIElements.PersonItem;
+import org.dashboard.client.UIElements.UserAddPane;
+import org.dashboard.client.UIElements.UserEditPane;
 
 public class DashboardView {
     private LoginControl loginControl;
@@ -56,6 +55,7 @@ public class DashboardView {
     private NotificationProvider notificationProvider;
     private DialogProvider dialogProvider;
     private ServerConnector serverConnector;
+    private UserOfDashboard userOfDashboard;
 
     private ObservableDashboardModel dashboardModelProperty;
 
@@ -65,6 +65,20 @@ public class DashboardView {
         this.notificationProvider = notificationProvider;
         this.dialogProvider = dialogProvider;
         this.serverConnector = serverConnector;
+    }
+
+    private void updatePeople(DashboardModel dashboardModel, ObservableList<UserOfDashboard> people) {
+        people.clear();
+
+        ServerConnector.GetDashboardUsersResult dashboardUsersResult = serverConnector.getDashboardUsers(dashboardModel.getOwnerUsername(), loginControl.getToken(), dashboardModel.getName());
+        if (dashboardUsersResult.success) {
+            people.addAll(dashboardUsersResult.users);
+        } else {
+            if (dashboardUsersResult.message.equals("Token expired")) {
+                loginControl.loginSuccessProperty().set(false);
+            }
+            notificationProvider.addNotification(new NotificationProvider.Notification("Error", dashboardUsersResult.message, Color.RED));
+        }
     }
     
     public Region getRegion(DashboardModel dashboardModel) {
@@ -77,132 +91,138 @@ public class DashboardView {
             e.printStackTrace();
         }
 
-        BorderPane root = new BorderPane();
-        HBox topBar = new HBox();
-        VBox toolPane = new VBox();
-        toolPane.setId("dashboard-menu-left");
-        ScrollPane scroll = new ScrollPane();
-        scroll.fitToWidthProperty().set(true);
-        GridPane dashboardGrid = new GridPane();
+        ObservableList<UserOfDashboard> people = FXCollections.observableArrayList();
 
-        SVGPath cancelEditIcon = Icons.getIcon(Icon.CLOSE, 15, 15);
-        cancelEditIcon.setFill(Color.WHITE);
-        SVGPath confirmEditIcon = Icons.getIcon(Icon.CONFIRM, 15, 15);
-        confirmEditIcon.setFill(Color.WHITE);
+        updatePeople(dashboardModel, people);
 
-        Button dumpJSONButton = new Button("dump JSON");
+        ServerConnector.UserOfDashboardResult userOfDashboardResult = serverConnector.getUserOfDashboard(loginControl.getUsername(), dashboardModel.getOwnerUsername(), loginControl.getToken(), dashboardModel.getName());
+        if (userOfDashboardResult.success) {
+            this.userOfDashboard = userOfDashboardResult.user;
+        } else {
+            if (userOfDashboardResult.message.equals("Token expired")) {
+                loginControl.loginSuccessProperty().set(false);
+            }
+            notificationProvider.addNotification(new NotificationProvider.Notification("Error", userOfDashboardResult.message, Color.RED));
+        }
 
-        HBox editButtonsContainer = new HBox();
-
-        Button editDashboardButton = new Button("Edit");
-
-        Button confirmEditButton = new Button("Confirm");
-        confirmEditButton.setId("success");
-        confirmEditButton.setGraphic(confirmEditIcon);
-
-        Button cancelEditButton = new Button("Cancel");
-        cancelEditButton.setId("danger");
-        cancelEditButton.setGraphic(cancelEditIcon);
-
-        Region topSpacer = new Region();
-        HBox.setHgrow(topSpacer, Priority.ALWAYS);
-
-        Button exitButton = new Button("exit");
-
-        Label nameLabel = new Label(dashboardModel.getName());
-        nameLabel.setId("dashboard-item-name");
-        
         EditModeControl editModeControl = new EditModeControl();
 
         HashMap<String, String> clockProperties = new HashMap<>();
         clockProperties.put("showDate", "true");
 
+        BorderPane root = new BorderPane();
+
+        // top
+        HBox topBar = new HBox();
+        topBar.setId("dashboard-menu-top");
+        topBar.setSpacing(5);
+        topBar.setPadding(new Insets(5));
+        topBar.setAlignment(Pos.CENTER);
+
+        SVGPath exitIcon = Icons.getIcon(Icon.BACK, 15, 15);
+        exitIcon.setFill(Color.WHITE);
+        SVGPath cancelEditIcon = Icons.getIcon(Icon.CLOSE, 15, 15);
+        cancelEditIcon.setFill(Color.WHITE);
+        SVGPath confirmEditIcon = Icons.getIcon(Icon.CONFIRM, 15, 15);
+        confirmEditIcon.setFill(Color.WHITE);
+
+        Button exitButton = new Button("Exit");
+        exitButton.setGraphic(exitIcon);
+
+        Button dumpJSONButton = new Button("dump JSON");
+
+        Label nameLabel = new Label(dashboardModel.getName());
+        nameLabel.setId("dashboard-item-name");
+
+        Region topSpacer = new Region();
+        HBox.setHgrow(topSpacer, Priority.ALWAYS);
+        
+        HBox editButtonsContainer = new HBox();
+        editButtonsContainer.setSpacing(5);
+        
+        Button editDashboardButton = new Button("Edit");
+        editDashboardButton.setVisible(this.userOfDashboard.getRole() == Role.OWNER || this.userOfDashboard.getRole() == Role.ADMIN);
+        
+        Button confirmEditButton = new Button("Confirm");
+        confirmEditButton.setId("success");
+        confirmEditButton.setGraphic(confirmEditIcon);
+        
+        Button cancelEditButton = new Button("Cancel");
+        cancelEditButton.setId("danger");
+        cancelEditButton.setGraphic(cancelEditIcon);
+        
+        editButtonsContainer.getChildren().addAll(editDashboardButton);
+        topBar.getChildren().addAll(exitButton, dumpJSONButton, nameLabel, topSpacer, editButtonsContainer);
+
+        // left
+        VBox editPane = new VBox();
+        editPane.setId("dashboard-menu-left");
+
+        SVGPath addPersonIcon = Icons.getIcon(Icon.ADD, 15, 15);
+        addPersonIcon.setFill(Color.WHITE);
+
+        Accordion editAccordion = new Accordion();
+
+        TitledPane elementsTitledPane = new TitledPane();
+        elementsTitledPane.setText("Elements");
+        
+        VBox elementsInnerPane = new VBox();
+        elementsInnerPane.setSpacing(5);
+        elementsInnerPane.setPadding(new Insets(5));
+        
         ElementInPanel clockElement = new ElementInPanel(new ClockElement(clockProperties, editModeControl), "Clock");
 
-        for (int i = 0; i < this.dashboardModelProperty.getProperties().getSizeX(); i++) {
-            for (int j = 0; j < this.dashboardModelProperty.getProperties().getSizeY(); j++) {
-                final int x = i;
-                final int y = j;
-                StackPane containerPane = new StackPane();
-                containerPane.setPadding(new Insets(5));
-
-                containerPane.prefWidthProperty().bind(dashboardGrid.widthProperty().divide(4));
-                containerPane.prefHeightProperty().bind(containerPane.widthProperty().divide(1.2));
-                // containerPane.prefHeightProperty().bind(dashboardGrid.heightProperty().divide(4));
-
-                containerPane.setBackground(null);
-                containerPane.borderProperty().bind(Bindings.createObjectBinding(
-                    () -> editModeControl.isEditMode() ? 
-                    new Border(new BorderStroke(Color.DARKGREY, BorderStrokeStyle.DASHED, new CornerRadii(5), new BorderWidths(2)))  :
-                    null, 
-                    editModeControl.editModeProperty()
-                ));
-
-                containerPane.setOnDragOver(new EventHandler<DragEvent>() {
-                    public void handle(DragEvent event) {
-                        if (editModeControl.isEditMode()) {
-                            if (event.getGestureSource() != containerPane) {
-                                if (event.getDragboard().hasContent(AbstractElement.DATA_FORMAT)) {
-                                    if (containerPane.getChildren().isEmpty()) {
-                                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                                    }
-                                    else {
-                                        event.acceptTransferModes(TransferMode.COPY);
-                                    }
-    
-                                    containerPane.setBackground(new Background(new BackgroundFill(Color.rgb(200, 200, 200, 0.5), new CornerRadii(5), null)));
-                                }
-                            }
-                        }
-                    }
-                });
-
-                containerPane.setOnDragExited(new EventHandler<DragEvent>() {
-                    @Override
-                    public void handle(DragEvent event) {
-                        containerPane.setBackground(null);
-
-                        event.consume();
-                    }
-                });
-
-                containerPane.setOnDragDropped(new EventHandler<DragEvent>() {
-                    @Override
-                    public void handle(DragEvent event) {
-                        AbstractElement dashboardElement = (AbstractElement) event.getDragboard().getContent(AbstractElement.DATA_FORMAT);
-                        dashboardElement.setDashboardModel(dashboardModelProperty);
-                        
-                        containerPane.getChildren().clear();
-                        containerPane.getChildren().add(dashboardElement.construct(editModeControl));
-                        dashboardModelProperty.setElement(x, y, dashboardElement);
-
-                        event.setDropCompleted(true);
-                        event.consume();
-                    }
-                });
-
-                if (dashboardModelProperty.getProperties().getElement(i, j) != null) {
-                    System.out.println(dashboardModelProperty.getProperties().getElement(i, j).getProperties());
-                    AbstractElement tempElement = (AbstractElement)dashboardModelProperty.getProperties().getElement(i, j);
-                    tempElement.setDashboardModel(dashboardModelProperty);
-                    containerPane.getChildren().add(tempElement.construct(editModeControl));
-                }
-
-                dashboardGrid.add(containerPane, i, j);
-            }
-        }
-
-        dashboardGrid.setHgap(5);
-        dashboardGrid.setVgap(5);
-
-        VBox alignToBottom = new VBox();
-        alignToBottom.prefHeightProperty().bind(root.heightProperty().subtract(topBar.heightProperty()));
-        alignToBottom.setAlignment(Pos.BOTTOM_CENTER);
+        VBox alignToBottomInElements = new VBox();
+        alignToBottomInElements.prefHeightProperty().bind(root.heightProperty().subtract(topBar.heightProperty()));
+        alignToBottomInElements.setAlignment(Pos.BOTTOM_CENTER);
 
         DeleteZone deleteZone = new DeleteZone();
 
-        alignToBottom.getChildren().add(deleteZone);
+        alignToBottomInElements.getChildren().add(deleteZone);
+        elementsInnerPane.getChildren().addAll(clockElement, alignToBottomInElements);
+        elementsTitledPane.setContent(elementsInnerPane);
 
+        TitledPane peopleTitledPane = new TitledPane();
+        peopleTitledPane.setText("People");
+
+        VBox peopleInnerPane = new VBox();
+        peopleInnerPane.setSpacing(5);
+        peopleInnerPane.setPadding(new Insets(5));
+
+        for (UserOfDashboard person : people) {
+            PersonItem personItem = new PersonItem(person, userOfDashboard, editModeControl);
+            peopleInnerPane.getChildren().add(personItem);
+        }
+
+        VBox alignToBottomInPeople = new VBox();
+        alignToBottomInPeople.prefHeightProperty().bind(root.heightProperty().subtract(topBar.heightProperty()));
+        alignToBottomInPeople.setAlignment(Pos.BOTTOM_CENTER);
+
+        Button addPersonButton = new Button("Add");
+        addPersonButton.setGraphic(addPersonIcon);
+        addPersonButton.setId("primary");
+
+        alignToBottomInPeople.getChildren().add(addPersonButton);
+
+        peopleInnerPane.getChildren().add(alignToBottomInPeople);
+
+        peopleTitledPane.setContent(peopleInnerPane);
+
+        TitledPane settingsTitledPane = new TitledPane();
+        settingsTitledPane.setText("Settings");
+
+        editAccordion.getPanes().addAll(elementsTitledPane, peopleTitledPane, settingsTitledPane);
+
+        editPane.getChildren().add(editAccordion);
+        
+        DashboardGrid dashboardGrid = new DashboardGrid(dashboardModelProperty, editModeControl);
+        UserEditPane userEditPane = new UserEditPane(editModeControl, loginControl, userViewControl, notificationProvider, dialogProvider, serverConnector, dashboardModel, people);
+        UserAddPane userAddPane = new UserAddPane(loginControl, serverConnector, notificationProvider, dashboardModel, people);
+
+        root.setTop(topBar);
+        root.setLeft(null);
+        root.setCenter(dashboardGrid);
+        
         root.setOnDragOver(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
@@ -212,7 +232,7 @@ public class DashboardView {
                 event.consume();
             }
         });
-
+        
         root.setOnDragExited(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
@@ -220,24 +240,6 @@ public class DashboardView {
                 event.consume();
             }
         });
-
-        editButtonsContainer.getChildren().addAll(editDashboardButton);
-        editButtonsContainer.setSpacing(5);
-
-        topBar.getChildren().addAll(exitButton, dumpJSONButton, nameLabel, topSpacer, editButtonsContainer);
-        topBar.setId("dashboard-menu-top");
-        topBar.setSpacing(5);
-        topBar.setPadding(new Insets(5));
-        topBar.setAlignment(Pos.CENTER);
-
-        toolPane.getChildren().addAll(clockElement, alignToBottom);
-        toolPane.setSpacing(5);
-        toolPane.setPadding(new Insets(5));
-
-        root.setTop(topBar);
-        root.setLeft(null);
-        scroll.setContent(dashboardGrid);
-        root.setCenter(scroll);
 
         exitButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -249,7 +251,7 @@ public class DashboardView {
         cancelEditButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                ServerConnector.DashboardGetResult result = serverConnector.getDashboard(loginControl.getUsername(), loginControl.getToken(), dashboardModel.getName());
+                ServerConnector.DashboardGetResult result = serverConnector.getDashboard(dashboardModel.getOwnerUsername(), loginControl.getToken(), dashboardModel.getName());
                 if (result.success) {
                     userViewControl.goToDashboardList();
                     userViewControl.goToDashboard(result.dashboard);
@@ -291,6 +293,19 @@ public class DashboardView {
             }
         });
 
+        addPersonButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                editModeControl.goToUserNew();
+            }
+        });
+
+        elementsTitledPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                editModeControl.goToElements();
+            }
+        });
+
         dashboardModelProperty.elementsProperty().addListener(new MapChangeListener<Pair<Integer, Integer>, DashboardElementModel>() {
             @Override
             public void onChanged(Change<? extends Pair<Integer, Integer>, ? extends DashboardElementModel> change) {
@@ -307,7 +322,7 @@ public class DashboardView {
                 try {
                     System.out.println(objectMapper.writeValueAsString(dashboardModelProperty.getDashboardModel()));
                     System.out.println(dashboardModelProperty.getDashboardModel().getProperties().toJSONString());
-                    ServerConnector.DashboardUpdateResult result = serverConnector.updateDashboard(loginControl.getUsername(), loginControl.getToken(), dashboardModelProperty.getDashboardModel());
+                    ServerConnector.DashboardUpdateResult result = serverConnector.updateDashboard(dashboardModel.getOwnerUsername(), loginControl.getToken(), dashboardModelProperty.getDashboardModel());
                     if (result.success) {
                         notificationProvider.addNotification(new NotificationProvider.Notification("Success", "Dashboard updated"));
                     } else {
@@ -315,6 +330,16 @@ public class DashboardView {
                             loginControl.loginSuccessProperty().set(false);
                         }
                         notificationProvider.addNotification(new NotificationProvider.Notification("Error", result.message, Color.RED));
+                        ServerConnector.DashboardGetResult resultGet = serverConnector.getDashboard(dashboardModel.getOwnerUsername(), loginControl.getToken(), dashboardModel.getName());
+                        if (resultGet.success) {
+                            userViewControl.goToDashboardList();
+                            userViewControl.goToDashboard(resultGet.dashboard);
+                        } else {
+                            if (resultGet.message.equals("Token expired")) {
+                                loginControl.loginSuccessProperty().set(false);
+                            }
+                            notificationProvider.addNotification(new NotificationProvider.Notification("Error", resultGet.message, Color.RED));
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -324,13 +349,84 @@ public class DashboardView {
 
         editModeControl.editModeProperty().addListener((observable, oldValue, isEditMode) -> {
             if (isEditMode) {
-                root.setLeft(toolPane);
+                root.setLeft(editPane);
                 editButtonsContainer.getChildren().remove(editDashboardButton);
                 editButtonsContainer.getChildren().addAll(confirmEditButton, cancelEditButton);
             } else {
                 root.setLeft(null);
                 editButtonsContainer.getChildren().removeAll(confirmEditButton, cancelEditButton);
                 editButtonsContainer.getChildren().add(editDashboardButton);
+            }
+        });
+
+        editModeControl.submodeProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == EditModeControl.Submode.ELEMENTS) {
+                root.setCenter(dashboardGrid);
+            }
+            if (newValue == EditModeControl.Submode.USER_NEW) {
+                root.setCenter(userAddPane);
+            }
+            if (newValue == EditModeControl.Submode.USER_EDIT) {
+                root.setCenter(userEditPane);
+            }
+            if (newValue == EditModeControl.Submode.SETTINGS) {
+                root.setCenter(null);
+            }
+        });
+
+        people.addListener(new ListChangeListener<UserOfDashboard>() {
+            @Override
+            public void onChanged(Change<? extends UserOfDashboard> change) {
+                while (change.next()) {
+                    if (change.wasAdded()) {
+                        people.sort((a, b) -> {
+                            if (a.getRole() == Role.OWNER) {
+                                return 1;
+                            } else if (b.getRole() == Role.OWNER) {
+                                return -1;
+                            } else {
+                                if (a.getRole() == Role.ADMIN) {
+                                    if (b.getRole() == Role.EDITOR || b.getRole() == Role.VIEWER) {
+                                        return 1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }
+                                if (a.getRole() == Role.EDITOR) {
+                                    if (b.getRole() == Role.VIEWER) {
+                                        return 1;
+                                    } else if (b.getRole() == Role.ADMIN) {
+                                        return -1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }
+                                if (a.getRole() == Role.VIEWER) {
+                                    if (b.getRole() == Role.EDITOR || b.getRole() == Role.ADMIN) {
+                                        return -1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }
+                            }
+                            return 0;
+                        });
+                        peopleInnerPane.getChildren().clear();
+                        for (UserOfDashboard person : people) {
+                            PersonItem personItem = new PersonItem(person, userOfDashboard, editModeControl);
+                            peopleInnerPane.getChildren().add(personItem);
+                        }
+                        peopleInnerPane.getChildren().add(alignToBottomInPeople);
+                    } else if (change.wasRemoved()) {
+                        peopleInnerPane.getChildren().clear();
+                        for (UserOfDashboard person : people) {
+                            PersonItem personItem = new PersonItem(person, userOfDashboard, editModeControl);
+                            peopleInnerPane.getChildren().add(personItem);
+                        }
+                        peopleInnerPane.getChildren().add(alignToBottomInPeople);
+                    }
+                }
+                
             }
         });
 

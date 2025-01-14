@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.github.Crow475</groupId>
             <artifactId>dashboard-common</artifactId>
-            <version>v02d</version>
+            <version>v03b</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/io.github.cdimascio/dotenv-java -->
