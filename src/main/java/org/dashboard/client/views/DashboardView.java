@@ -37,8 +37,13 @@ import org.dashboard.client.controls.UserViewControl;
 import org.dashboard.client.providers.DialogProvider;
 import org.dashboard.client.providers.NotificationProvider;
 import org.dashboard.client.dashboardElements.AbstractElement;
+import org.dashboard.client.dashboardElements.AnnouncementElement;
 import org.dashboard.client.dashboardElements.ClockElement;
 import org.dashboard.client.dashboardElements.ElementInPanel;
+import org.dashboard.client.dashboardElements.EmbedElement;
+import org.dashboard.client.dashboardElements.LinksElement;
+import org.dashboard.client.dashboardElements.NotesElement;
+import org.dashboard.client.dashboardElements.TasksElement;
 import org.dashboard.client.Icons;
 import org.dashboard.client.ObservableDashboardModel;
 import org.dashboard.client.ServerConnector;
@@ -106,9 +111,34 @@ public class DashboardView {
         }
 
         EditModeControl editModeControl = new EditModeControl();
+        editModeControl.userEditingProperty().set(userOfDashboard);
 
         HashMap<String, String> clockProperties = new HashMap<>();
         clockProperties.put("showDate", "true");
+
+        HashMap<String, String> linksProperties = new HashMap<>();
+        linksProperties.put("header", "Useful links");
+        linksProperties.put("links", "[{\"label\":\"Example\",\"link\":\"https://example.com\"}]");
+
+        HashMap<String, String> embedProperties = new HashMap<>();
+        embedProperties.put("header", "Embed");
+        embedProperties.put("zoom", "0.5");
+        embedProperties.put("url", "https://example.com");
+
+        HashMap<String, String> announcementProperties = new HashMap<>();
+        announcementProperties.put("header", "Announcement");
+
+        HashMap<String, String> notesPropertiesPublic = new HashMap<>();
+        notesPropertiesPublic.put("header", "Notes");
+        notesPropertiesPublic.put("publicText", "This is an example public note");
+        notesPropertiesPublic.put("publicAccess", "true");
+
+        HashMap<String, String> notesPropertiesPrivate = new HashMap<>();
+        notesPropertiesPrivate.put("header", "Notes");
+        notesPropertiesPublic.put("publicAccess", "false");
+
+        HashMap<String, String> tasksProperties = new HashMap<>();
+        tasksProperties.put("header", "Tasks");
 
         BorderPane root = new BorderPane();
 
@@ -171,6 +201,12 @@ public class DashboardView {
         elementsInnerPane.setPadding(new Insets(5));
         
         ElementInPanel clockElement = new ElementInPanel(new ClockElement(clockProperties, editModeControl), "Clock");
+        ElementInPanel linksElement = new ElementInPanel(new LinksElement(linksProperties, editModeControl), "Links");
+        ElementInPanel embedElement = new ElementInPanel(new EmbedElement(embedProperties, editModeControl), "Embed");
+        ElementInPanel announcementElement = new ElementInPanel(new AnnouncementElement(announcementProperties, editModeControl), "Announcement");
+        ElementInPanel notesElementPublic = new ElementInPanel(new NotesElement(notesPropertiesPublic, editModeControl), "Notes (Public)");
+        ElementInPanel notesElementPrivate = new ElementInPanel(new NotesElement(notesPropertiesPrivate, editModeControl), "Notes (Private)");
+        ElementInPanel tasksElement = new ElementInPanel(new TasksElement(tasksProperties, editModeControl), "Tasks");
 
         VBox alignToBottomInElements = new VBox();
         alignToBottomInElements.prefHeightProperty().bind(root.heightProperty().subtract(topBar.heightProperty()));
@@ -179,7 +215,7 @@ public class DashboardView {
         DeleteZone deleteZone = new DeleteZone();
 
         alignToBottomInElements.getChildren().add(deleteZone);
-        elementsInnerPane.getChildren().addAll(clockElement, alignToBottomInElements);
+        elementsInnerPane.getChildren().addAll(clockElement, linksElement, embedElement, announcementElement, notesElementPublic, notesElementPrivate, tasksElement, alignToBottomInElements);
         elementsTitledPane.setContent(elementsInnerPane);
 
         TitledPane peopleTitledPane = new TitledPane();
@@ -215,7 +251,7 @@ public class DashboardView {
 
         editPane.getChildren().add(editAccordion);
         
-        DashboardGrid dashboardGrid = new DashboardGrid(dashboardModelProperty, editModeControl);
+        DashboardGrid dashboardGrid = new DashboardGrid(dashboardModelProperty, editModeControl, loginControl, notificationProvider, serverConnector);
         UserEditPane userEditPane = new UserEditPane(editModeControl, loginControl, userViewControl, notificationProvider, dialogProvider, serverConnector, dashboardModel, people);
         UserAddPane userAddPane = new UserAddPane(loginControl, serverConnector, notificationProvider, dashboardModel, people);
 

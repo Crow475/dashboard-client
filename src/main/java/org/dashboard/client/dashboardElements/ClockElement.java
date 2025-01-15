@@ -26,6 +26,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 
 import org.dashboard.client.controls.EditModeControl;
+import org.dashboard.client.controls.LoginControl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -95,7 +96,7 @@ public class ClockElement extends AbstractElement {
     }
 
     @Override
-    Region getBaseNode() {
+    Region getBaseNode(EditModeControl editModeControl, LoginControl loginControl) {
         VBox clockContainer = new VBox();
         Label timeLabel = new Label();
         Label dateLabel = new Label();
@@ -150,7 +151,7 @@ public class ClockElement extends AbstractElement {
     }
 
     @Override
-    Region getSettingsNode() {
+    Region getSettingsNode(EditModeControl editModeControl, LoginControl loginControl) {
         GridPane settingsContainer = new GridPane();
         Label showDateLabel = new Label("Show Date");
         Label showSecondsLabel = new Label("Show Seconds");

@@ -1,8 +1,12 @@
 package org.dashboard.client.UIElements;
 
 import org.dashboard.client.ObservableDashboardModel;
+import org.dashboard.client.ServerConnector;
 import org.dashboard.client.controls.EditModeControl;
+import org.dashboard.client.controls.LoginControl;
 import org.dashboard.client.dashboardElements.AbstractElement;
+import org.dashboard.client.providers.NotificationProvider;
+import org.dashboard.common.models.UserOfDashboard;
 
 import javafx.beans.binding.Bindings;
 import javafx.event.EventHandler;
@@ -22,7 +26,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class DashboardGrid extends ScrollPane {
-    public DashboardGrid(ObservableDashboardModel dashboardModelProperty, EditModeControl editModeControl) {
+    public DashboardGrid(ObservableDashboardModel dashboardModelProperty, EditModeControl editModeControl, LoginControl loginControl, NotificationProvider notificationProvider, ServerConnector serverConnector) {
         super();
 
         this.fitToWidthProperty().set(true);
@@ -41,6 +45,8 @@ public class DashboardGrid extends ScrollPane {
                 containerPane.prefWidthProperty().bind(dashboardGrid.widthProperty().divide(4));
                 containerPane.prefHeightProperty().bind(containerPane.widthProperty().divide(1.2));
                 // containerPane.prefHeightProperty().bind(dashboardGrid.heightProperty().divide(4));
+
+                containerPane.setMinSize(80, 80);
                 
                 containerPane.setBackground(null);
                 containerPane.borderProperty().bind(Bindings.createObjectBinding(
@@ -85,7 +91,7 @@ public class DashboardGrid extends ScrollPane {
                         dashboardElement.setDashboardModel(dashboardModelProperty);
                         
                         containerPane.getChildren().clear();
-                        containerPane.getChildren().add(dashboardElement.construct(editModeControl));
+                        containerPane.getChildren().add(dashboardElement.construct(editModeControl, loginControl, notificationProvider, serverConnector));
                         dashboardModelProperty.setElement(x, y, dashboardElement);
                         
                         event.setDropCompleted(true);
@@ -97,7 +103,7 @@ public class DashboardGrid extends ScrollPane {
                     System.out.println(dashboardModelProperty.getProperties().getElement(i, j).getProperties());
                     AbstractElement tempElement = (AbstractElement)dashboardModelProperty.getProperties().getElement(i, j);
                     tempElement.setDashboardModel(dashboardModelProperty);
-                    containerPane.getChildren().add(tempElement.construct(editModeControl));
+                    containerPane.getChildren().add(tempElement.construct(editModeControl, loginControl, notificationProvider, serverConnector));
                 }
                 
                 dashboardGrid.add(containerPane, i, j);

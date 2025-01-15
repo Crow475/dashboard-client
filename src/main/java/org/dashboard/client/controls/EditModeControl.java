@@ -1,5 +1,6 @@
 package org.dashboard.client.controls;
 
+import org.dashboard.common.Role;
 import org.dashboard.common.models.UserOfDashboard;
 
 import javafx.beans.property.BooleanProperty;
@@ -10,8 +11,8 @@ import javafx.beans.property.SimpleStringProperty;
 public class EditModeControl {
     private final BooleanProperty editMode = new SimpleBooleanProperty(false);
     private final SimpleObjectProperty<Submode> submode = new SimpleObjectProperty<>(Submode.ELEMENTS);
-    // private SimpleStringProperty userToEdit = new SimpleStringProperty("");
     private SimpleObjectProperty<UserOfDashboard> userToEdit = new SimpleObjectProperty<UserOfDashboard>(null);
+    private SimpleObjectProperty<UserOfDashboard> userEditing = new SimpleObjectProperty<UserOfDashboard>(null);
 
     public enum Submode {
         ELEMENTS,
@@ -72,6 +73,20 @@ public class EditModeControl {
         this.userToEdit.set(null);
     }
 
+    public boolean isAtLeastEditor() {
+        if (userEditing.get() != null) {
+            Role role = userEditing.get().getRole();
+
+            if (role.equals(Role.OWNER) || role.equals(Role.ADMIN) || role.equals(Role.EDITOR)) {
+                return true;
+            }
+               
+            return false;
+        }
+
+        return false;
+    }
+
     public SimpleObjectProperty<Submode> submodeProperty() {
         return submode;
     }
@@ -82,5 +97,13 @@ public class EditModeControl {
 
     public SimpleObjectProperty<UserOfDashboard> userToEditProperty() {
         return userToEdit;
+    }
+
+    public UserOfDashboard getUserEditing() {
+        return (UserOfDashboard)userEditing.get();
+    }
+
+    public SimpleObjectProperty<UserOfDashboard> userEditingProperty() {
+        return userEditing;
     }
 }

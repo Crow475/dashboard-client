@@ -23,13 +23,18 @@ import org.dashboard.common.models.DashboardElementModel;
 
 import org.dashboard.client.Icons;
 import org.dashboard.client.ObservableDashboardModel;
+import org.dashboard.client.ServerConnector;
 import org.dashboard.client.controls.EditModeControl;
+import org.dashboard.client.controls.LoginControl;
+import org.dashboard.client.providers.NotificationProvider;
 
 public abstract class AbstractElement extends DashboardElementModel {
     public static final DataFormat DATA_FORMAT = new DataFormat("dashboard.element");
 
-    private transient EditModeControl editModeControl;
-    private transient ObservableDashboardModel dashboardModel;
+    protected transient ObservableDashboardModel dashboardModel;
+    protected transient EditModeControl editModeControl;
+    protected transient NotificationProvider notificationProvider;
+    protected transient ServerConnector serverConnector;
 
     public AbstractElement(DashboardElementModel.Type type, HashMap<String, String> elementProperties, EditModeControl editModeControl) {
         super(type, elementProperties);
@@ -41,16 +46,16 @@ public abstract class AbstractElement extends DashboardElementModel {
         this.dashboardModel = dashboardModel;
     }
 
-    abstract Region getBaseNode();
+    abstract Region getBaseNode(EditModeControl editModeControl, LoginControl loginControl);
 
-    abstract Region getSettingsNode();
+    abstract Region getSettingsNode(EditModeControl editModeControl, LoginControl loginControl);
 
     abstract void updateAllProperties();
 
-    public Region construct(EditModeControl editModeControl) {
+    public Region construct(EditModeControl editModeControl, LoginControl loginControl, NotificationProvider notificationProvider, ServerConnector serverConnector) {
         class Update {
-            public Region node() {
-                Region node = getBaseNode();
+            public Region node(EditModeControl editModeControl, LoginControl loginControl) {
+                Region node = getBaseNode(editModeControl, loginControl);
                 AnchorPane.setTopAnchor(node, 0.0);
                 AnchorPane.setRightAnchor(node, 0.0);
                 AnchorPane.setBottomAnchor(node, 0.0);
@@ -64,10 +69,12 @@ public abstract class AbstractElement extends DashboardElementModel {
         this.updateAllProperties();
 
         AnchorPane container = new AnchorPane();
-        Region node = update.node();
-        Region settingsNode = getSettingsNode();
+        Region node = update.node(editModeControl, loginControl);
+        Region settingsNode = getSettingsNode(editModeControl, loginControl);
 
         this.editModeControl = editModeControl;
+        this.notificationProvider = notificationProvider;
+        this.serverConnector = serverConnector;
 
         SVGPath settingsIcon = Icons.getIcon(Icons.Icon.SETTINGS, 13, 13);
         settingsIcon.setFill(Color.WHITE);
@@ -89,7 +96,7 @@ public abstract class AbstractElement extends DashboardElementModel {
             public void handle(ActionEvent event) {
                 if (container.getChildren().contains(settingsNode)) {
                     container.getChildren().clear();
-                    container.getChildren().add(update.node());
+                    container.getChildren().add(update.node(editModeControl, loginControl));
                     container.getChildren().add(settingsButton);
                 } else {
                     container.getChildren().clear();
@@ -102,7 +109,7 @@ public abstract class AbstractElement extends DashboardElementModel {
         editModeControl.editModeProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 container.getChildren().clear();
-                container.getChildren().add(update.node());
+                container.getChildren().add(update.node(editModeControl, loginControl));
                 container.getChildren().add(settingsButton);
             }
         });

@@ -390,7 +390,7 @@
 
 #dashboard-menu-left {
     -fx-border-color: rgb(211, 212, 213);
-    -fx-border-width: 0 1 0 0;
+    -fx-border-width: 0 1 0 0;    
 }
 
 #username-label {

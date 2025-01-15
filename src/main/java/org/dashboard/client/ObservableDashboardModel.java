@@ -23,6 +23,7 @@ public class ObservableDashboardModel {
     private ObjectProperty<Date> updatedAt;
     private ObjectProperty<DashboardModel.Properties> propertiesObservable;
     private ObservableMap<Pair<Integer, Integer>, DashboardElementModel> elements;
+    private StringProperty ownerUsername;
 
     public ObservableDashboardModel(DashboardModel dashboardModel) {
         this.dashboardModel = dashboardModel;
@@ -30,6 +31,7 @@ public class ObservableDashboardModel {
         this.createdAt = new SimpleObjectProperty<>(dashboardModel.getCreatedAt());
         this.updatedAt = new SimpleObjectProperty<>(dashboardModel.getUpdatedAt());
         this.propertiesObservable = new SimpleObjectProperty<>(dashboardModel.getProperties());
+        this.ownerUsername = new SimpleStringProperty(dashboardModel.getOwnerUsername());
 
         this.elements = FXCollections.observableMap(new HashMap<>());
 
@@ -79,6 +81,10 @@ public class ObservableDashboardModel {
         return elements;
     }
 
+    public StringProperty ownerUsernameProperty() {
+        return ownerUsername;
+    }
+
     public String getName() {
         return name.get();
     }
@@ -89,6 +95,10 @@ public class ObservableDashboardModel {
 
     public Date getUpdatedAt() {
         return updatedAt.get();
+    }
+
+    public String getOwnerUsername() {
+        return ownerUsername.get();
     }
 
     public DashboardModel getDashboardModel() {
@@ -115,5 +125,7 @@ public class ObservableDashboardModel {
         System.out.println("remove element called");
         elements.entrySet().removeIf(entry -> entry.getValue().equals(element));
     }
+
+
 
 }

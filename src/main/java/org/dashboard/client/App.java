@@ -77,9 +77,11 @@ public class App extends Application {
             }
         });
 
-        Scene scene = new Scene(root, 640, 480);
-        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm()); 
+        Scene scene = new Scene(root, 800, 600);
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 
+        stage.setMinHeight(600);
+        stage.setMinWidth(800);
         stage.setTitle("Dashboard");
         stage.setScene(scene);
         stage.show();

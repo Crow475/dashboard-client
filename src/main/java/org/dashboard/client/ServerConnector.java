@@ -338,6 +338,8 @@ public class ServerConnector {
         DashboardModel dashboardModel = new DashboardModel(dashboard.getId(), dashboard.getOwnerId(), dashboard.getCreatedAt(), dashboard.getUpdatedAt(), dashboard.getName(), dashboard.getProperties());
         dashboardModel.clearProperties();
 
+        System.out.println("sent data: " + data);
+
         Request request = new Request("Update dashboard", data, dashboardModel, token);
 
         Request response = sendRequest(request);
@@ -601,6 +603,7 @@ public class ServerConnector {
                 if (response.getObject() != null && response.getObject() instanceof ArrayList) {
                     ArrayList<UserOfDashboard> recievedUsers = (ArrayList<UserOfDashboard>)response.getObject();
                     recievedUsers.forEach(user -> {
+                        System.out.println("in connector: user: " + user);
                         result.users.add(user);
                     });
                 } else {
