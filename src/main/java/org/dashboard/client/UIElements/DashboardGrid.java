@@ -100,7 +100,7 @@ public class DashboardGrid extends ScrollPane {
                 });
                 
                 if (dashboardModelProperty.getProperties().getElement(i, j) != null) {
-                    System.out.println(dashboardModelProperty.getProperties().getElement(i, j).getProperties());
+                    // System.out.println(dashboardModelProperty.getProperties().getElement(i, j).getProperties());
                     AbstractElement tempElement = (AbstractElement)dashboardModelProperty.getProperties().getElement(i, j);
                     tempElement.setDashboardModel(dashboardModelProperty);
                     containerPane.getChildren().add(tempElement.construct(editModeControl, loginControl, notificationProvider, serverConnector));

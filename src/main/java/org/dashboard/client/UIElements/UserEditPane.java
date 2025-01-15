@@ -81,7 +81,6 @@ public class UserEditPane extends VBox {
 
         roleComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && initialRole.get() != null) {
-                System.out.println(newValue + " was: " + initialRole.get());
                 if (newValue.equals(initialRole.get())) {
                     confirmButton.setDisable(true);
                 } else {

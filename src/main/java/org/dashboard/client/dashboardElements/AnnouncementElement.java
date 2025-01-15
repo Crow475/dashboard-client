@@ -150,7 +150,6 @@ public class AnnouncementElement extends AbstractElement {
         });
         
         if (editModeControl != null) {
-            System.out.println("editModeControl is not null");
             if (editModeControl.isAtLeastEditor()) {
                 rootPane.setBottom(editButton);
             } else {

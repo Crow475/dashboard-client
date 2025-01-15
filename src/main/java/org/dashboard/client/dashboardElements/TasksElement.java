@@ -112,14 +112,10 @@ public class TasksElement extends AbstractElement {
         ObservableList<UserOfDashboard> users = FXCollections.observableArrayList();
         ObservableList<Task> tasksList = FXCollections.observableArrayList();
 
-        System.out.println("tasks: " + this.tasks);
-
         if (this.tasks != null && !this.tasks.equals("")) {
-            System.out.println("tasks is not null");
             try {
                 ArrayList<Task> tasksListTemp = new ObjectMapper().readValue(tasks, new TypeReference<ArrayList<Task>>(){});
                 tasksList.addAll(tasksListTemp);
-                System.out.println("taskLIst: " + tasksList);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -202,7 +198,6 @@ public class TasksElement extends AbstractElement {
         });
 
         if (editModeControl != null) {
-            System.out.println("editModeControl is not null");
             if (editModeControl.isAtLeastEditor()) {
                 rootPane.setBottom(editButton);
             } else {

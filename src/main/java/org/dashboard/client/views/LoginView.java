@@ -271,12 +271,12 @@ public class LoginView {
 
                 ServerConnector.LoginRequestResult result = serverConnector.loginRequest(username, password);
 
-                if (result.success) {
-                    System.out.println(result.message);
-                    System.out.println(result.token);
-                } else {
-                    System.out.println(result.message);
-                }
+                // if (result.success) {
+                //     System.out.println(result.message);
+                //     System.out.println(result.token);
+                // } else {
+                //     System.out.println(result.message);
+                // }
 
                 if (result.success) {
                     u.clearAllFields();

@@ -197,7 +197,6 @@ public class NotesElement extends AbstractElement {
         });
 
         if (editModeControl != null) {
-            System.out.println("editModeControl is not null");
             if (editModeControl.isAtLeastEditor()  && this.publicAccess) {
                 rootPane.setBottom(editButton);
             } else {

@@ -90,11 +90,11 @@ public class DashboardView {
         this.dashboardModelProperty = new ObservableDashboardModel(dashboardModel);
         ObjectMapper objectMapper = new ObjectMapper();
 
-        try {
-            System.out.println(objectMapper.writeValueAsString(dashboardModelProperty.getDashboardModel()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     System.out.println(objectMapper.writeValueAsString(dashboardModelProperty.getDashboardModel()));
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
 
         ObservableList<UserOfDashboard> people = FXCollections.observableArrayList();
 
@@ -159,7 +159,7 @@ public class DashboardView {
         Button exitButton = new Button("Exit");
         exitButton.setGraphic(exitIcon);
 
-        Button dumpJSONButton = new Button("dump JSON");
+        // Button dumpJSONButton = new Button("dump JSON");
 
         Label nameLabel = new Label(dashboardModel.getName());
         nameLabel.setId("dashboard-item-name");
@@ -182,7 +182,7 @@ public class DashboardView {
         cancelEditButton.setGraphic(cancelEditIcon);
         
         editButtonsContainer.getChildren().addAll(editDashboardButton);
-        topBar.getChildren().addAll(exitButton, dumpJSONButton, nameLabel, topSpacer, editButtonsContainer);
+        topBar.getChildren().addAll(exitButton, nameLabel, topSpacer, editButtonsContainer);
 
         // left
         VBox editPane = new VBox();
@@ -244,10 +244,10 @@ public class DashboardView {
 
         peopleTitledPane.setContent(peopleInnerPane);
 
-        TitledPane settingsTitledPane = new TitledPane();
-        settingsTitledPane.setText("Settings");
+        // TitledPane settingsTitledPane = new TitledPane();
+        // settingsTitledPane.setText("Settings");
 
-        editAccordion.getPanes().addAll(elementsTitledPane, peopleTitledPane, settingsTitledPane);
+        editAccordion.getPanes().addAll(elementsTitledPane, peopleTitledPane);
 
         editPane.getChildren().add(editAccordion);
         
@@ -318,16 +318,16 @@ public class DashboardView {
             }
         });
 
-        dumpJSONButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                try {
-                    System.out.println(objectMapper.writeValueAsString(dashboardModelProperty.getDashboardModel()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        // dumpJSONButton.setOnAction(new EventHandler<ActionEvent>() {
+        //     @Override
+        //     public void handle(ActionEvent event) {
+        //         try {
+        //             System.out.println(objectMapper.writeValueAsString(dashboardModelProperty.getDashboardModel()));
+        //         } catch (Exception e) {
+        //             e.printStackTrace();
+        //         }
+        //     }
+        // });
 
         addPersonButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override

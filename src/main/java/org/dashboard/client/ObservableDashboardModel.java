@@ -122,7 +122,7 @@ public class ObservableDashboardModel {
     }
 
     public void removeElement(DashboardElementModel element) {
-        System.out.println("remove element called");
+        // System.out.println("remove element called");
         elements.entrySet().removeIf(entry -> entry.getValue().equals(element));
     }
 
