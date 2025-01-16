@@ -133,9 +133,9 @@ public class DashboardView {
         notesPropertiesPublic.put("publicText", "This is an example public note");
         notesPropertiesPublic.put("publicAccess", "true");
 
-        HashMap<String, String> notesPropertiesPrivate = new HashMap<>();
-        notesPropertiesPrivate.put("header", "Notes");
-        notesPropertiesPublic.put("publicAccess", "false");
+        // HashMap<String, String> notesPropertiesPrivate = new HashMap<>();
+        // notesPropertiesPrivate.put("header", "Notes");
+        // notesPropertiesPublic.put("publicAccess", "false");
 
         HashMap<String, String> tasksProperties = new HashMap<>();
         tasksProperties.put("header", "Tasks");
@@ -204,8 +204,8 @@ public class DashboardView {
         ElementInPanel linksElement = new ElementInPanel(new LinksElement(linksProperties, editModeControl), "Links");
         ElementInPanel embedElement = new ElementInPanel(new EmbedElement(embedProperties, editModeControl), "Embed");
         ElementInPanel announcementElement = new ElementInPanel(new AnnouncementElement(announcementProperties, editModeControl), "Announcement");
-        ElementInPanel notesElementPublic = new ElementInPanel(new NotesElement(notesPropertiesPublic, editModeControl), "Notes (Public)");
-        ElementInPanel notesElementPrivate = new ElementInPanel(new NotesElement(notesPropertiesPrivate, editModeControl), "Notes (Private)");
+        ElementInPanel notesElementPublic = new ElementInPanel(new NotesElement(notesPropertiesPublic, editModeControl), "Notes");
+        // ElementInPanel notesElementPrivate = new ElementInPanel(new NotesElement(notesPropertiesPrivate, editModeControl), "Notes (Private)");
         ElementInPanel tasksElement = new ElementInPanel(new TasksElement(tasksProperties, editModeControl), "Tasks");
 
         VBox alignToBottomInElements = new VBox();
@@ -215,7 +215,7 @@ public class DashboardView {
         DeleteZone deleteZone = new DeleteZone();
 
         alignToBottomInElements.getChildren().add(deleteZone);
-        elementsInnerPane.getChildren().addAll(clockElement, linksElement, embedElement, announcementElement, notesElementPublic, notesElementPrivate, tasksElement, alignToBottomInElements);
+        elementsInnerPane.getChildren().addAll(announcementElement, clockElement, embedElement, linksElement, notesElementPublic, tasksElement, alignToBottomInElements);
         elementsTitledPane.setContent(elementsInnerPane);
 
         TitledPane peopleTitledPane = new TitledPane();

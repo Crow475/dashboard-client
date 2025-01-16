@@ -105,6 +105,9 @@ public class LinksElement extends AbstractElement {
         Label headerLabel = new Label(this.header);
         headerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
 
+        ScrollPane scrollCenterPane = new ScrollPane();
+        scrollCenterPane.setFitToWidth(true);
+
         VBox centerPane = new VBox();
         centerPane.setSpacing(5);
         centerPane.setPadding(new Insets(5));
@@ -135,6 +138,8 @@ public class LinksElement extends AbstractElement {
             e.printStackTrace();
         }
 
+        scrollCenterPane.setContent(centerPane);
+
         if (this.bordered) {
             rootPane.setStyle("-fx-border-color: rgb(211, 212, 213); -fx-border-width: 1; -fx-border-radius: 5;");
         } else {
@@ -142,7 +147,7 @@ public class LinksElement extends AbstractElement {
         }
 
         rootPane.setPadding(new Insets(10));
-        rootPane.setCenter(centerPane);
+        rootPane.setCenter(scrollCenterPane);
         rootPane.setTop(headerLabel);
 
         return rootPane;

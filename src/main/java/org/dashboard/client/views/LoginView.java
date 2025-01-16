@@ -38,7 +38,7 @@ public class LoginView {
         String mediumFontStyle = "-fx-font-size: 14;";
 
         Label welcomeLabel = new Label("Welcome to the Dashboard App!");
-        Label loginLabel = new Label("Please login to continue:");
+        Label loginLabel = new Label("Please log in to continue:");
         Region spacer = new Region();
         
         welcomeLabel.setStyle(largestFontStyle);
